@@ -10,14 +10,14 @@ using namespace physx;
 PxPhysics* physics = 0;
 PxFoundation* foundation = 0;
 #if PX_PHYSICS_VERSION < 0x304000 // SDK 3.3
-debugger::comm::PvdConnection* pvd = 0;
+debugger::comm::PvdConnection * pvd = 0;
 #else
-PxPvd*  pvd = 0;
+PxPvd* pvd = 0;
 #endif
 
 //simulation objects
 PxScene* scene;
-PxRigidDynamic* box;
+PxRigidDynamic *box, *restingBox;
 PxRigidStatic* plane;
 
 ///Initialise PhysX objects
@@ -35,7 +35,7 @@ bool PxInit()
 	foundation = PxCreateFoundation(PX_FOUNDATION_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
 #endif
 
-	if(!foundation)
+	if (!foundation)
 		return false;
 
 	//connect to an external visual debugger (if exists)
@@ -44,7 +44,7 @@ bool PxInit()
 		PxVisualDebuggerExt::getAllConnectionFlags());
 #else
 	pvd = PxCreatePvd(*foundation);
-	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("localhost", 5425, 10);
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate("localhost", 5425, 10000);
 	pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 #endif
 
@@ -55,19 +55,19 @@ bool PxInit()
 	physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale(), true, pvd);
 #endif
 
-	if(!physics)
+	if (!physics)
 		return false;
 
 	//create a default scene
 	PxSceneDesc sceneDesc(physics->getTolerancesScale());
 
-	if(!sceneDesc.cpuDispatcher)
+	if (!sceneDesc.cpuDispatcher)
 	{
 		PxDefaultCpuDispatcher* mCpuDispatcher = PxDefaultCpuDispatcherCreate(1);
 		sceneDesc.cpuDispatcher = mCpuDispatcher;
 	}
 
-	if(!sceneDesc.filterShader)
+	if (!sceneDesc.filterShader)
 		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
 
 	scene = physics->createScene(sceneDesc);
@@ -98,19 +98,25 @@ void InitScene()
 	scene->setGravity(PxVec3(0.f, -9.81f, 0.f));
 
 	//materials
-	PxMaterial* default_material = physics->createMaterial(0.f, 0.f, 0.f);   //static friction, dynamic friction, restitution
+	//PxMaterial* default_material = physics->createMaterial(0.f, 0.066f, 0.f);   //static friction, dynamic friction, restitution
+	PxMaterial* default_material = physics->createMaterial(0.f, 0.f, 0.5f);
 
 	//create a static plane (XZ)
 	plane = PxCreatePlane(*physics, PxPlane(PxVec3(0.f, 1.f, 0.f), 0.f), *default_material);
 	scene->addActor(*plane);
 
-	//create a dynamic actor and place it 10 m above the ground
-	box = physics->createRigidDynamic(PxTransform(PxVec3(0.f, 10.f, 0.f)));
+	//create a dynamic actor and place it 10m above the ground
+	box = physics->createRigidDynamic(PxTransform(PxVec3(0.f, 100.5f, 0.f)));
+	// create a dynamic box resting on the plane
+	restingBox = physics->createRigidDynamic(PxTransform(PxVec3(0.f, 0.5f, 0.f)));
 	//create a box shape of 1m x 1m x 1m size (values are provided in halves)
-	box->createShape(PxBoxGeometry(.5f, .5f, .5f), *default_material);
+	box->createShape(PxBoxGeometry(PxVec3(.5f, .5f, .5f) * 1), *default_material);
+	restingBox->createShape(PxBoxGeometry(PxVec3(.5f, .5f, .5f) * 1), *default_material);
 	//update the mass of the box
 	PxRigidBodyExt::updateMassAndInertia(*box, 1.f); //density of 1kg/m^3
+	PxRigidBodyExt::updateMassAndInertia(*restingBox, 1.0f);
 	scene->addActor(*box);
+	scene->addActor(*restingBox);
 }
 
 /// Perform a single simulation step
@@ -134,7 +140,14 @@ int main()
 	InitScene();
 
 	//set the simulation step to 1/60th of a second
-	PxReal delta_time = 1.f/60.f;
+	PxReal delta_time = 1.f / 60.f;
+
+	// used to calculate time in seconds until impact
+	int stepCounter = 0;
+
+	cout << "Box mass: " << box->getMass() << endl;
+
+	//box->addForce(PxVec3(100.0f, 0.0f, 0.0f));
 
 	//simulate until the 'Esc' is pressed
 	while (!GetAsyncKeyState(VK_ESCAPE))
@@ -142,16 +155,25 @@ int main()
 		//'visualise' position and velocity of the box
 		PxVec3 position = box->getGlobalPose().p;
 		PxVec3 velocity = box->getLinearVelocity();
-		cout << setiosflags(ios::fixed) << setprecision(2) << "x=" << position.x << 
+		cout << "Step " << ++stepCounter << " (" << delta_time * stepCounter * 1000 << "ms elapsed): ";
+		cout << "sleep = " << (box->isSleeping() ? "true" : "false") << ", ";
+		cout << setiosflags(ios::fixed) << setprecision(2) << "x=" << position.x <<
 			", y=" << position.y << ", z=" << position.z << ",  ";
-		cout << setiosflags(ios::fixed) << setprecision(2) << "vx=" << velocity.x << 
+		cout << setiosflags(ios::fixed) << setprecision(2) << "vx=" << velocity.x <<
 			", vy=" << velocity.y << ", vz=" << velocity.z << endl;
+
+		/*if (PxVec3(position - PxVec3(0.0f, 10.0f, 0.0f)).magnitude() >= 10.0f)
+		{
+			//box->setGlobalPose(*(new PxTransform(10.0f, 0.0f, 0.0f)));
+			box->setLinearVelocity(PxVec3(0.0f));
+		}*/
 
 		//perform a single simulation step
 		Update(delta_time);
-		
+
 		//introduce 100ms delay for easier visual analysis of the results
-		Sleep(100);
+		//Sleep(100);
+		Sleep(1000 / 120);
 	}
 
 	//Release all resources
