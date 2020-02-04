@@ -122,4 +122,21 @@ namespace PhysicsEngine
 			return GetPhysics()->createTriangleMesh(input);
 		}
 	};
+
+	class CompoundObject : public DynamicActor {
+	public:
+		//2 Boxes with default parameters:
+		// - pose in 0,0,0
+		// - dimensions: 1m x 1m x 1m
+		// - denisty: 1kg/m^3
+		CompoundObject(const PxTransform& pose = PxTransform(PxIdentity), PxVec3 dimensions = PxVec3(.5f, .5f, .5f), PxReal density = 1.f)
+			: DynamicActor(pose)
+		{
+			CreateShape(PxBoxGeometry(dimensions), density);
+			CreateShape(PxBoxGeometry(dimensions), density);
+
+			GetShape(0)->setLocalPose(PxTransform(abs(dimensions.x) * -1.0f, 0.0f, 0.0f));
+			GetShape(1)->setLocalPose(PxTransform(abs(dimensions.x), 0.0f, 0.0f));
+		}
+	};
 }

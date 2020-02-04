@@ -279,6 +279,7 @@ namespace PhysicsEngine
 	void Scene::Add(Actor* actor)
 	{
 		px_scene->addActor(*actor->Get());
+		actors.push_back(actor);
 	}
 
 	PxScene* Scene::Get() 
@@ -350,6 +351,11 @@ namespace PhysicsEngine
 		std::vector<PxActor*> actors(px_scene->getNbActors(selection_flag));
 		px_scene->getActors(selection_flag, (PxActor**)&actors.front(), (PxU32)actors.size());
 		return actors;
+	}
+
+	Actor* Scene::GetActor(int index)
+	{
+		return actors[index];
 	}
 
 	void Scene::HighlightOn(PxRigidDynamic* actor)

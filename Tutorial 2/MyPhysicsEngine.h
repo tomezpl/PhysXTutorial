@@ -41,6 +41,9 @@ namespace PhysicsEngine
 	{
 		Plane* plane;
 		Box* box;
+		Sphere** spheres;
+		CompoundObject* compoundObj;
+		Box** boxTower;
 
 	public:
 		///A custom scene class
@@ -48,6 +51,8 @@ namespace PhysicsEngine
 		{
 			px_scene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 			px_scene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
+			px_scene->setVisualizationParameter(PxVisualizationParameter::eACTOR_AXES, 1.0f);
+			px_scene->setVisualizationParameter(PxVisualizationParameter::eBODY_LIN_VELOCITY, 1.0f);
 		}
 
 		//Custom scene initialisation
@@ -57,13 +62,39 @@ namespace PhysicsEngine
 
 			GetMaterial()->setDynamicFriction(.2f);
 
+			PxReal degree2Rad = PxPi / 180.0f;
+
 			plane = new Plane();
 			plane->Color(PxVec3(210.f/255.f,210.f/255.f,210.f/255.f));
 			Add(plane);
 
-			box = new Box(PxTransform(PxVec3(.0f,10.f,.0f)));
+			box = new Box(PxTransform(PxVec3(.0f,10.f,0.0f)), PxVec3(5.0f, .5f, 0.5f));
 			box->Color(color_palette[0]);
 			Add(box);
+
+			spheres = new Sphere*[2];
+
+			spheres[0] = new Sphere(PxTransform(-1.0f, 0.5f, 0.0f));
+			spheres[0]->Color(PxVec3(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f)); // cornflower blue ftw
+			Add(spheres[0]);
+
+			spheres[1] = new Sphere(PxTransform(1.0f, 0.5f, 0.0f));
+			spheres[1]->Color(PxVec3(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f)); // cornflower blue ftw
+			Add(spheres[1]);
+
+			compoundObj = new CompoundObject(PxTransform(0.0f, 1.0f, 2.0f, PxQuat(45.0f * degree2Rad, PxVec3(0.f,1.f,0.f)) * PxQuat(90.0f * degree2Rad, PxVec3(0.f, 0.f, 1.f))));
+			compoundObj->Color(PxVec3(0.0f, 1.0f, 0.0f));
+			Add(compoundObj);
+
+			int towerHeight = 20;
+			boxTower = new Box*[towerHeight];
+			for (int i = 0; i < towerHeight; i++)
+			{
+				PxQuat orientation = PxQuat((45.0f + (float)i) * degree2Rad, PxVec3(0.f, 1.f, 0.f))/* * PxQuat(45.0f * degree2Rad, PxVec3(0.f, 0.f, 1.f))*/;
+				boxTower[i] = new Box(PxTransform(-10.f, 0.5f + 1.0f * (float)i, 0.0f));
+				boxTower[i]->Color(PxVec3(1.0f, 1.0f, 0.0f));
+				Add(boxTower[i]);
+			}
 		}
 
 		//Custom udpate function

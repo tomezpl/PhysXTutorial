@@ -105,6 +105,8 @@ namespace PhysicsEngine
 
 		void HighlightOff(PxRigidDynamic* actor);
 
+		std::vector<Actor*> actors;
+
 	public:
 		///Init the scene
 		void Init();
@@ -141,5 +143,8 @@ namespace PhysicsEngine
 
 		///a list with all actors
 		std::vector<PxActor*> GetAllActors();
+
+		// Get Actor object with specified index
+		Actor* GetActor(int index = 0);
 	};
 }

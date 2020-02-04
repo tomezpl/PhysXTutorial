@@ -40,6 +40,7 @@ namespace VisualDebugger
 	Camera* camera;
 	PhysicsEngine::MyScene* scene;
 	PxReal delta_time = 1.f/60.f;
+	PxReal elapsedTime = 0.f;
 	PxReal gForceStrength = 20;
 	RenderMode render_mode = NORMAL;
 	const int MAX_KEYS = 256;
@@ -122,13 +123,21 @@ namespace VisualDebugger
 
 	//Start the main loop
 	void Start()
-	{ 
+	{
+		scene->Pause(true);
 		glutMainLoop(); 
 	}
 
 	//Render the scene and perform a single simulation step
 	void RenderScene()
 	{
+		// Change box colour
+		float colorMultiplier[3] = { abs(sin(elapsedTime)), abs(cos(elapsedTime)), abs(tan(elapsedTime)) };
+		scene->GetActor(1)->Color(PxVec3(
+			PhysicsEngine::color_palette[0].x * colorMultiplier[0], 
+			PhysicsEngine::color_palette[0].y * colorMultiplier[1],
+			PhysicsEngine::color_palette[0].z * colorMultiplier[2]));
+
 		//handle pressed keys
 		KeyHold();
 
@@ -166,6 +175,8 @@ namespace VisualDebugger
 
 		//perform a single simulation step
 		scene->Update(delta_time);
+
+		elapsedTime += delta_time;
 	}
 
 	//user defined keyboard handlers
