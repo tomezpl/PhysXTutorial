@@ -90,16 +90,27 @@ namespace PhysicsEngine
 			boxTower = new Box*[towerHeight];
 			for (int i = 0; i < towerHeight; i++)
 			{
-				PxQuat orientation = PxQuat((45.0f + (float)i) * degree2Rad, PxVec3(0.f, 1.f, 0.f))/* * PxQuat(45.0f * degree2Rad, PxVec3(0.f, 0.f, 1.f))*/;
-				boxTower[i] = new Box(PxTransform(-10.f, 0.5f + 1.0f * (float)i, 0.0f));
+				PxQuat orientation = PxQuat((45.0f + (float)i * 2) * degree2Rad, PxVec3(0.f, 1.f, 0.f))/* * PxQuat(45.0f * degree2Rad, PxVec3(0.f, 0.f, 1.f))*/;
+				boxTower[i] = new Box(PxTransform(-10.f, 0.5f + 1.0f * (float)i, 0.0f, orientation));
 				boxTower[i]->Color(PxVec3(1.0f, 1.0f, 0.0f));
 				Add(boxTower[i]);
 			}
 		}
 
 		//Custom udpate function
-		virtual void CustomUpdate() 
+		virtual void CustomUpdate(float dTime) 
 		{
+			if (pause)
+				return;
+
+			PxReal degree2Rad = PxPi / 180.0f;
+			PxTransform currentPose = ((PxRigidActor*)compoundObj->Get())->getGlobalPose();
+			float yAngle = 0.f;
+			if (currentPose.q.w <= -1.0f + 0.000001f)
+				currentPose.q.w = 1.0f;
+			currentPose.q.toRadiansAndUnitAxis(yAngle, PxVec3(0.f, 1.f, 0.f));
+			PxQuat newOrientation = PxQuat((yAngle + 10.f*degree2Rad*dTime), PxVec3(0.f,1.f,0.f));
+			((PxRigidActor*)compoundObj->Get())->setGlobalPose(PxTransform(currentPose.p, newOrientation));
 		}
 	};
 }

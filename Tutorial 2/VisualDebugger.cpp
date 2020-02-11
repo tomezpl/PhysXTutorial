@@ -176,6 +176,8 @@ namespace VisualDebugger
 		//perform a single simulation step
 		scene->Update(delta_time);
 
+		scene->CustomUpdate(delta_time);
+
 		elapsedTime += delta_time;
 	}
 
