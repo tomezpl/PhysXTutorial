@@ -3,6 +3,7 @@
 #include "PhysicsEngine.h"
 #include <iostream>
 #include <iomanip>
+#include <map>
 
 namespace PhysicsEngine
 {
@@ -137,6 +138,25 @@ namespace PhysicsEngine
 
 			GetShape(0)->setLocalPose(PxTransform(abs(dimensions.x) * -1.0f, 0.0f, 0.0f));
 			GetShape(1)->setLocalPose(PxTransform(abs(dimensions.x), 0.0f, 0.0f));
+		}
+
+		// Create compound object using a list of actors and their local poses
+		CompoundObject(std::vector<std::pair<DynamicActor&, PxTransform&>> actors, const PxTransform& pose = PxTransform(PxIdentity)) : DynamicActor(pose)
+		{
+			for (int i = 0; i < actors.size(); i++)
+			{
+				PxBoxGeometry geometry = actors[i].first.GetShape()->getGeometry().box();
+				CreateShape(geometry, 1.f);
+				GetShape(i)->setLocalPose(actors[i].second);
+			}
+		}
+	};
+
+	class TwinBoxesCompoundObject : public CompoundObject {
+	public:
+		TwinBoxesCompoundObject(const PxTransform& pose = PxTransform(PxIdentity), PxVec3 dimensions = PxVec3(.5f, .5f, .5f)) : CompoundObject({ {Box(PxTransform(PxIdentity), dimensions), PxTransform(abs(dimensions.x) * -1.0f, 0.0f, 0.0f)}, {Box(PxTransform(PxIdentity), dimensions), PxTransform(abs(dimensions.x), 0.0f, 0.0f)} }, pose)
+		{
+
 		}
 	};
 }

@@ -82,7 +82,7 @@ namespace PhysicsEngine
 			spheres[1]->Color(PxVec3(100.0f / 255.0f, 149.0f / 255.0f, 237.0f / 255.0f)); // cornflower blue ftw
 			Add(spheres[1]);
 
-			compoundObj = new CompoundObject(PxTransform(0.0f, 1.0f, 2.0f, PxQuat(45.0f * degree2Rad, PxVec3(0.f,1.f,0.f)) * PxQuat(90.0f * degree2Rad, PxVec3(0.f, 0.f, 1.f))));
+			compoundObj = new TwinBoxesCompoundObject(PxTransform(0.0f, 1.0f, 2.0f, PxQuat(45.0f * degree2Rad, PxVec3(0.f,1.f,0.f)) * PxQuat(90.0f * degree2Rad, PxVec3(0.f, 0.f, 1.f))));
 			compoundObj->Color(PxVec3(0.0f, 1.0f, 0.0f));
 			Add(compoundObj);
 
