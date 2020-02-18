@@ -185,7 +185,8 @@ namespace PhysicsEngine
 	class MyScene : public Scene
 	{
 		Plane* plane;
-		Box* box, * box2;
+		Box* box;
+		Box** jointBoxes;
 		Trampoline* trampoline;
 		MySimulationEventCallback* my_callback;
 		
@@ -238,6 +239,16 @@ namespace PhysicsEngine
 			//and has the second object attached 5 meters away along the Y axis from the first object.
 			RevoluteJoint joint(box, PxTransform(PxVec3(0.f,0.f,0.f),PxQuat(PxPi/2,PxVec3(0.f,1.f,0.f))), box2, PxTransform(PxVec3(0.f,5.f,0.f)));
 			*/
+
+			jointBoxes = new Box*[2];
+			jointBoxes[0] = new Box(PxTransform(PxVec3(-5.5f, .5f, .5f)));
+			jointBoxes[1] = new Box(PxTransform(PxVec3(-5.5f, 5.5f, .5f)));
+			//jointBoxes[0]->SetupFiltering(FilterGroup::ACTOR0, FilterGroup::ACTOR1);
+			//jointBoxes[1]->SetupFiltering(FilterGroup::ACTOR1, FilterGroup::ACTOR0);
+			RevoluteJoint joint(jointBoxes[0], PxTransform(PxVec3(0.f, 0.f, 0.f)), jointBoxes[1], PxTransform(PxVec3(0.f, 5.f, 0.f)));
+
+			Add(jointBoxes[0]);
+			Add(jointBoxes[1]);
 		}
 
 		//Custom udpate function
