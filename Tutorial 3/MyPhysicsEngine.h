@@ -186,6 +186,7 @@ namespace PhysicsEngine
 	{
 		Plane* plane;
 		Box* box, * box2;
+		Trampoline* trampoline;
 		MySimulationEventCallback* my_callback;
 		
 	public:
@@ -198,6 +199,8 @@ namespace PhysicsEngine
 		{
 			px_scene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.0f);
 			px_scene->setVisualizationParameter(PxVisualizationParameter::eCOLLISION_SHAPES, 1.0f);
+			px_scene->setVisualizationParameter(PxVisualizationParameter::eJOINT_LOCAL_FRAMES, 1.0f);
+			px_scene->setVisualizationParameter(PxVisualizationParameter::eJOINT_LIMITS, 1.0f);
 		}
 
 		//Custom scene initialisation
@@ -215,7 +218,7 @@ namespace PhysicsEngine
 			plane->Color(PxVec3(210.f/255.f,210.f/255.f,210.f/255.f));
 			Add(plane);
 
-			box = new Box(PxTransform(PxVec3(.0f,.5f,.0f)));
+			box = new Box(PxTransform(PxVec3(.0f,25.5f,.0f)));
 			box->Color(color_palette[0]);
 			//set collision filter flags
 			// box->SetupFiltering(FilterGroup::ACTOR0, FilterGroup::ACTOR1);
@@ -225,6 +228,9 @@ namespace PhysicsEngine
 			// box2->SetupFiltering(FilterGroup::ACTOR1, FilterGroup::ACTOR0);
 			box->Name("Box1");
 			Add(box);
+
+			trampoline = new Trampoline(PxVec3(1.f,1.f,1.f), 20.f, 0.5f);
+			trampoline->AddToScene(this);
 
 			/*
 			//joint two boxes together
