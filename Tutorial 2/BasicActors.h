@@ -126,20 +126,6 @@ namespace PhysicsEngine
 
 	class CompoundObject : public DynamicActor {
 	public:
-		//2 Boxes with default parameters:
-		// - pose in 0,0,0
-		// - dimensions: 1m x 1m x 1m
-		// - denisty: 1kg/m^3
-		CompoundObject(const PxTransform& pose = PxTransform(PxIdentity), PxVec3 dimensions = PxVec3(.5f, .5f, .5f), PxReal density = 1.f)
-			: DynamicActor(pose)
-		{
-			CreateShape(PxBoxGeometry(dimensions), density);
-			CreateShape(PxBoxGeometry(dimensions), density);
-
-			GetShape(0)->setLocalPose(PxTransform(abs(dimensions.x) * -1.0f, 0.0f, 0.0f));
-			GetShape(1)->setLocalPose(PxTransform(abs(dimensions.x), 0.0f, 0.0f));
-		}
-
 		// Create compound object using a list of actors and their local poses
 		CompoundObject(std::vector<std::pair<DynamicActor&, PxTransform&>> actors, const PxTransform& pose = PxTransform(PxIdentity)) : DynamicActor(pose)
 		{
@@ -178,6 +164,34 @@ namespace PhysicsEngine
 		TwinBoxesCompoundObject(const PxTransform& pose = PxTransform(PxIdentity), PxVec3 dimensions = PxVec3(.5f, .5f, .5f)) : CompoundObject({ {Box(PxTransform(PxIdentity), dimensions), PxTransform(abs(dimensions.x) * -1.0f, 0.0f, 0.0f)}, {Box(PxTransform(PxIdentity), dimensions), PxTransform(abs(dimensions.x), 0.0f, 0.0f)} }, pose)
 		{
 
+		}
+	};
+
+	class RotatedCapsulesCompoundObject : public CompoundObject {
+	protected:
+		std::vector<std::pair<DynamicActor&, PxTransform&>> makeActorDict(int actorCount, PxVec3 rotationAxis, PxVec2 actorDimensions)
+		{
+			std::vector<std::pair<DynamicActor&, PxTransform&>> ret;
+
+			for (int i = 0; i < actorCount; i++)
+			{
+				Capsule* capsule = new Capsule(PxTransform(PxIdentity), actorDimensions);
+				float rotAngle = 0.f;
+				if (actorCount > 1)
+				{
+					rotAngle = ((PxPi * 2) / actorCount) * i;
+				}
+				PxQuat orientation = PxQuat(rotAngle, rotationAxis);
+				// TODO: this won't work for anything else than XZ axis
+				PxTransform* transform = new PxTransform(PxVec3(orientation.x * orientation.w, orientation.z * orientation.w, orientation.y * orientation.w), orientation);
+				ret.push_back(std::pair<Capsule&, PxTransform&>(*capsule, *transform));
+			}
+
+			return ret;
+		}
+	public:
+		RotatedCapsulesCompoundObject(int capsuleCount = 4, PxVec3 rotationAxis = PxVec3(0.f,1.f,0.f), const PxTransform& pose = PxTransform(PxIdentity), PxVec2 capsuleDimensions = PxVec2(1.f, 1.f)) : CompoundObject(makeActorDict(capsuleCount, rotationAxis, capsuleDimensions), pose)
+		{
 		}
 	};
 }

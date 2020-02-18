@@ -42,7 +42,7 @@ namespace PhysicsEngine
 		Plane* plane;
 		Box* box;
 		Sphere** spheres;
-		CompoundObject* compoundObj;
+		CompoundObject* compoundObj, *compoundObj2;
 		Box** boxTower;
 
 	public:
@@ -85,6 +85,9 @@ namespace PhysicsEngine
 			compoundObj = new TwinBoxesCompoundObject(PxTransform(0.0f, 1.0f, 2.0f, PxQuat(45.0f * degree2Rad, PxVec3(0.f,1.f,0.f)) * PxQuat(90.0f * degree2Rad, PxVec3(0.f, 0.f, 1.f))));
 			compoundObj->Color(PxVec3(0.0f, 1.0f, 0.0f));
 			Add(compoundObj);
+
+			compoundObj2 = new RotatedCapsulesCompoundObject(4, PxVec3(0.f, 1.f, 0.f), PxTransform(PxVec3(0.f, 1.f, 5.f)));
+			Add(compoundObj2);
 
 			int towerHeight = 20;
 			boxTower = new Box*[towerHeight];
