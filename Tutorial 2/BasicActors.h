@@ -145,8 +145,29 @@ namespace PhysicsEngine
 		{
 			for (int i = 0; i < actors.size(); i++)
 			{
-				PxBoxGeometry geometry = actors[i].first.GetShape()->getGeometry().box();
-				CreateShape(geometry, 1.f);
+				PxGeometry* geometry = nullptr;
+				switch (actors[i].first.GetShape()->getGeometryType())
+				{
+				case PxGeometryType::eBOX:
+					geometry = new PxBoxGeometry(actors[i].first.GetShape()->getGeometry().box());
+					break;
+				case PxGeometryType::eCAPSULE:
+					geometry = new PxCapsuleGeometry(actors[i].first.GetShape()->getGeometry().capsule());
+					break;
+				case PxGeometryType::eSPHERE:
+					geometry = new PxSphereGeometry(actors[i].first.GetShape()->getGeometry().sphere());
+					break;
+				case PxGeometryType::ePLANE:
+					geometry = new PxPlaneGeometry(actors[i].first.GetShape()->getGeometry().plane());
+					break;
+				case PxGeometryType::eCONVEXMESH:
+					geometry = new PxConvexMeshGeometry(actors[i].first.GetShape()->getGeometry().convexMesh());
+					break;
+				default:
+					geometry = new PxGeometry(actors[i].first.GetShape()->getGeometry().any());
+					break;
+				}
+				CreateShape(*geometry, 1.f);
 				GetShape(i)->setLocalPose(actors[i].second);
 			}
 		}
