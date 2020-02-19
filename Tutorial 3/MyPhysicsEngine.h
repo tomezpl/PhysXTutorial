@@ -186,7 +186,7 @@ namespace PhysicsEngine
 	{
 		Plane* plane;
 		Box* box;
-		Box** jointBoxes;
+		Actor** jointBoxes;
 		Trampoline* trampoline;
 		MySimulationEventCallback* my_callback;
 		
@@ -240,8 +240,8 @@ namespace PhysicsEngine
 			RevoluteJoint joint(box, PxTransform(PxVec3(0.f,0.f,0.f),PxQuat(PxPi/2,PxVec3(0.f,1.f,0.f))), box2, PxTransform(PxVec3(0.f,5.f,0.f)));
 			*/
 
-			jointBoxes = new Box*[2];
-			jointBoxes[0] = new Box(PxTransform(PxVec3(-5.5f, .5f, .5f)));
+			jointBoxes = new Actor*[2];
+			jointBoxes[0] = new StaticBox(PxTransform(PxVec3(-5.5f, .5f, .5f)));
 			jointBoxes[1] = new Box(PxTransform(PxVec3(-5.5f, 5.5f, .5f)));
 			//jointBoxes[0]->SetupFiltering(FilterGroup::ACTOR0, FilterGroup::ACTOR1);
 			//jointBoxes[1]->SetupFiltering(FilterGroup::ACTOR1, FilterGroup::ACTOR0);
