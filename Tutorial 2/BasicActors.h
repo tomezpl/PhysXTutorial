@@ -194,4 +194,24 @@ namespace PhysicsEngine
 		{
 		}
 	};
+
+	class Enclosure : public DynamicActor
+	{
+	public:
+		Enclosure(PxReal thickness = 0.5f, const PxTransform& pose = PxTransform(PxIdentity), PxVec2 dimensions = PxVec2(1.f, 1.f)) : DynamicActor(pose)
+		{
+			int i = 0;
+			CreateShape(PxBoxGeometry(PxVec3(dimensions.x, thickness / 2.f, thickness / 2.f)), 1.f);
+			GetShape(i++)->setLocalPose(PxTransform(PxVec3(0.f, dimensions.y * -1.f + thickness / 2.f, 0.f)));
+			if (dimensions.y - thickness > 0.f)
+			{
+				CreateShape(PxBoxGeometry(PxVec3(thickness / 2.f, dimensions.y - thickness, thickness / 2.f)), 1.f);
+				GetShape(i++)->setLocalPose(PxTransform(PxVec3(dimensions.x * -1.f + thickness / 2.f, 0.f, 0.f)));
+				CreateShape(PxBoxGeometry(PxVec3(thickness / 2.f, dimensions.y - thickness, thickness / 2.f)), 1.f);
+				GetShape(i++)->setLocalPose(PxTransform(PxVec3(dimensions.x - thickness / 2.f, 0.f, 0.f)));
+			}
+			CreateShape(PxBoxGeometry(PxVec3(dimensions.x, thickness / 2.f, thickness / 2.f)), 1.f);
+			GetShape(i++)->setLocalPose(PxTransform(PxVec3(0.f, dimensions.y - thickness / 2.f, 0.f)));
+		}
+	};
 }

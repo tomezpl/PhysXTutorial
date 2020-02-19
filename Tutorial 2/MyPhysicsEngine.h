@@ -44,6 +44,7 @@ namespace PhysicsEngine
 		Sphere** spheres;
 		CompoundObject* compoundObj, *compoundObj2;
 		Box** boxTower;
+		Enclosure* enclosure;
 
 	public:
 		///A custom scene class
@@ -88,6 +89,10 @@ namespace PhysicsEngine
 
 			compoundObj2 = new RotatedCapsulesCompoundObject(4, PxVec3(0.f, 1.f, 0.f), PxTransform(PxVec3(0.f, 1.f, 5.f)));
 			Add(compoundObj2);
+
+			enclosure = new Enclosure(3.f, PxTransform(PxVec3(0.5f, 3.f, 10.5f)), PxVec2(3.0f,3.0f));
+			enclosure->Color(PxVec3(0.f, 0.f, 1.f));
+			Add(enclosure);
 
 			int towerHeight = 20;
 			boxTower = new Box*[towerHeight];
